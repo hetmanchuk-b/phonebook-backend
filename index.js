@@ -38,21 +38,29 @@ app.get('/api/persons/:id', (req, res) => {
   const id = req.params.id
   Person.findById(id)
     .then((person) => {
-      res.json(person)
+      if (person) {
+        res.json(person)
+      } else {
+        res.status(404).end()
+      }
     })
     .catch(() => {
-      res.status(404).end()
+      res.status(500).end()
     })
 })
 
 app.delete('/api/persons/:id', (req, res) => {
   const id = req.params.id
   Person.deleteOne(id)
-    .then(() => {
-      res.status(204).end()
+    .then((data) => {
+      if (data.deletedCount === 1) {
+        res.status(204).end()
+      } else {
+        res.status(404).end()
+      }
     })
     .catch(() => {
-      res.status(404).end()
+      res.status(500).end()
     })
 })
 
@@ -73,9 +81,13 @@ app.post('/api/persons', (req, res) => {
     number: body.number,
   })
 
-  person.save().then((savedPerson) => {
-    res.json(savedPerson)
-  })
+  person.save()
+    .then((savedPerson) => {
+      res.json(savedPerson)
+    })
+    .catch(() => {
+      res.status(500).end()
+    })
 })
 
 const PORT = process.env.PORT || 3001
